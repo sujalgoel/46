@@ -2,7 +2,7 @@
 
 A real-time cloud intrusion detection system that monitors AWS CloudTrail events, evaluates them against a rule engine, and surfaces security alerts through a live dashboard.
 
-![Dashboard](ids_next_dashboard.png)
+![Dashboard](public/og-image.jpg)
 
 ---
 
