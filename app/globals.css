@@ -133,3 +133,9 @@
     cursor: pointer;
   }
 }
+
+.recharts-wrapper:focus,
+.recharts-wrapper svg:focus,
+.recharts-wrapper *:focus {
+  outline: none;
+}

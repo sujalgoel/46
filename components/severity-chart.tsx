@@ -24,8 +24,8 @@ export function SeverityChart({ data, colours }: Props) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220} style={{ outline: "none" }}>
-      <PieChart>
+    <ResponsiveContainer width="100%" height={220}>
+      <PieChart style={{ outline: "none" }}>
         <Pie
           data={chartData}
           cx="50%"

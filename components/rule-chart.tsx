@@ -26,8 +26,8 @@ export function RuleChart({ data }: Props) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={220} style={{ outline: "none" }}>
-      <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16 }}>
+    <ResponsiveContainer width="100%" height={220}>
+      <BarChart data={data} layout="vertical" margin={{ left: 0, right: 16 }} style={{ outline: "none" }}>
         <XAxis type="number" tick={{ fontSize: 11 }} />
         <YAxis
           type="category"
