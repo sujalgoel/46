@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model Log {
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  event_id        String  @unique
+  user_email      String
+  timestamp       String
+  action          String
+  file_name       String
+  ip_address      String
+  user_type       String  @default("iamuser")
+  permission_type String  @default("")
+
+  @@map("logs")
+}
+
+model Alert {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  alert_id     String  @unique
+  timestamp    String
+  rule_id      String
+  rule_name    String
+  severity     String
+  user_email   String
+  details      String
+  event        Json
+  acknowledged Boolean @default(false)
+
+  @@map("alerts")
+}
