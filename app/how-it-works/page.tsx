@@ -98,18 +98,18 @@ export default function HowItWorksPage() {
             {[
               {
                 icon: Shield, color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20",
-                label: "Layer 1 — Rule Engine",
+                label: "Layer 1: Rule Engine",
                 desc: "Ten hand-written rules check every incoming event against known attack patterns like root account usage, IAM privilege escalation, and bulk S3 deletion. This layer is fast, deterministic, and will never miss a known threat.",
               },
               {
                 icon: Activity, color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20",
-                label: "Layer 2 — Isolation Forest",
-                desc: "Isolation Forest is a classical ML algorithm that scores every event between 0 and 1 based on how unusual it looks compared to a baseline of normal behaviour. It catches threats that no written rule would cover, such as unusual access timing, sudden bursts of activity, or rare user types. No training data or neural network involved.",
+                label: "Layer 2: Isolation Forest",
+                desc: "Isolation Forest is a classical ML algorithm that scores every event between 0 and 1 based on how unusual it looks compared to a baseline of normal behaviour. It catches threats that no written rule would cover, such as unusual access timing, sudden bursts of activity, or rare user types. No training data or neural network involved. Events flagged only by this layer (with no rule match) are stored as AI-001 ML Anomaly Detection alerts.",
               },
               {
                 icon: Brain, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20",
-                label: "Layer 3 — GPT-4.1 Final Verdict",
-                desc: "Every suspect (any event that matched a rule or scored above 0.62 on the anomaly scale) gets reviewed by GPT-4.1. It receives the full event, all matched rules, and the ML score together, then returns a structured verdict with isThreat, confidence percentage, severity, plain-English reasoning, and a recommended AWS action.",
+                label: "Layer 3: GPT-4.1 Final Verdict",
+                desc: "Every suspect (any event that matched a rule or scored above 0.62 on the anomaly scale) gets reviewed by GPT-4.1. It receives the full event, all matched rules, and the ML score together, then returns a structured verdict with isThreat, confidence percentage, severity, plain-English reasoning, and a recommended AWS action. If a single event triggers multiple rules, GPT-4.1 is called only once and the verdict is shared across all resulting alerts. If the GPT-4.1 call fails, rule-based alerts fall back to a default verdict with 70% confidence so they are never silently dropped.",
               },
               {
                 icon: Zap, color: "text-green-500", bg: "bg-green-500/10 border-green-500/20",
