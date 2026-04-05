@@ -106,7 +106,7 @@ export default function HowItWorksPage() {
               {
                 icon: Activity, color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20",
                 label: "Layer 2 — Isolation Forest (ML)",
-                desc: "An unsupervised machine learning model scores every event 0–1 based on how anomalous it looks compared to a trained baseline of normal behaviour. Catches threats no rule covers — unusual timing, rare action bursts, suspicious user types.",
+                desc: "Isolation Forest — a classical ML algorithm — scores every event 0–1 based on how anomalous it looks compared to normal behaviour. No neural network or training data needed; it uses random decision trees to spot outliers. Catches threats no rule covers — unusual timing, rare action bursts, suspicious user types.",
               },
               {
                 icon: Brain, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20",
@@ -177,7 +177,7 @@ export default function HowItWorksPage() {
         </CardHeader>
         <CardContent className="pb-5">
           <p className="text-xs text-muted-foreground mb-3">
-            Each event is converted into a 6-number feature vector. The model trains on 300 synthetic normal events and learns what typical CloudTrail activity looks like. Events that are statistically hard to explain get high scores.
+            Each event is converted into a 6-number feature vector. The Isolation Forest algorithm fits on 300 synthetic normal events to establish a baseline, then scores real events by how many random tree splits it takes to isolate them — fewer splits = more anomalous = higher score.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
             {[
