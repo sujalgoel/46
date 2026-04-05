@@ -37,7 +37,7 @@ export default async function LogsPage({
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          AWS CloudTrail events · {logs.length} records
+          Raw CloudTrail events ingested by the system · {logs.length} records
         </p>
       </div>
 

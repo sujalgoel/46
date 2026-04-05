@@ -23,7 +23,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          AWS CloudTrail — real-time intrusion detection · Amity University
+          Real-time AWS CloudTrail intrusion detection · Amity University
         </p>
         <p className="text-xs text-muted-foreground/60 mt-0.5">
           Group 46 · Riya Karagwal &amp; Rhea T. Chakraborty · Guide: Prof. (Dr.) S. K. Dubey

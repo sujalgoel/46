@@ -16,78 +16,76 @@ const SEVERITY_STYLE: Record<Severity, string> = {
 const rules = [
   {
     id: "AWS-001", name: "Root Account Usage", severity: "CRITICAL" as Severity,
-    description: "Any CloudTrail event where userIdentity.type = Root. Root has unrestricted access to every resource and should never be used for day-to-day operations.",
-    mitigation: "Enable MFA on root, lock away root credentials, use IAM roles instead.",
+    description: "Fires on any CloudTrail event where the identity type is Root. The root account has unrestricted access to everything and should never be used for routine operations.",
+    mitigation: "Enable MFA on root, lock the credentials away, and use IAM roles for all day-to-day tasks.",
   },
   {
     id: "AWS-002", name: "CloudTrail Logging Disabled", severity: "CRITICAL" as Severity,
-    description: "StopLogging or DeleteTrail was called — a classic attacker move to erase evidence before or after an intrusion.",
-    mitigation: "Enable CloudTrail log file validation and configure SNS alerts on trail changes.",
+    description: "StopLogging or DeleteTrail was called. This is a well-known attacker technique used to wipe evidence before or after a breach.",
+    mitigation: "Enable CloudTrail log file validation and set up SNS alerts for any trail modifications.",
   },
   {
     id: "AWS-003", name: "IAM Privilege Escalation", severity: "CRITICAL" as Severity,
-    description: "AdministratorAccess or PowerUser policy attached via AttachUserPolicy, AttachRolePolicy, PutUserPolicy, or PutRolePolicy — grants near-unlimited permissions.",
-    mitigation: "Use permission boundaries, require MFA for sensitive IAM actions, alert on any admin policy change.",
+    description: "AdministratorAccess or PowerUser policy was attached to an IAM user or role via AttachUserPolicy, AttachRolePolicy, PutUserPolicy, or PutRolePolicy. This grants near-unlimited permissions.",
+    mitigation: "Use permission boundaries, require MFA before sensitive IAM operations, and alert on every admin policy change.",
   },
   {
     id: "AWS-004", name: "Excessive Access Denied", severity: "HIGH" as Severity,
-    description: "More than 10 AccessDenied errors from the same principal within 5 minutes — credential brute-force or automated enumeration.",
-    mitigation: "Rotate suspected credentials, review IAM policies, block IP if external.",
+    description: "More than 10 AccessDenied errors from the same principal within 5 minutes. This pattern usually points to credential brute-force or an automated enumeration tool.",
+    mitigation: "Rotate the suspected credentials, review IAM policies for over-broad denies, and block the IP if it is external.",
   },
   {
     id: "AWS-005", name: "S3 Bucket Made Public", severity: "HIGH" as Severity,
-    description: "DeleteBucketPublicAccessBlock, PutBucketAcl with AllUsers/AuthenticatedUsers, or PutBucketPolicy with Principal: * was called.",
-    mitigation: "Enable S3 Block Public Access at account level, use SCPs to prevent public bucket creation.",
+    description: "DeleteBucketPublicAccessBlock, PutBucketAcl with AllUsers or AuthenticatedUsers as the grantee, or PutBucketPolicy with Principal set to * was detected.",
+    mitigation: "Enable S3 Block Public Access at the account level and use SCPs to prevent public bucket creation entirely.",
   },
   {
     id: "AWS-006", name: "Multiple Failed Console Logins", severity: "HIGH" as Severity,
-    description: "More than 3 failed AWS Console login attempts from the same user within 10 minutes.",
-    mitigation: "Enforce MFA for all IAM users, consider IP-based conditional access policies.",
+    description: "More than 3 failed AWS Console login attempts from the same user within 10 minutes, which is a strong indicator of a password guessing attack.",
+    mitigation: "Enforce MFA for all IAM users and consider restricting console access by IP range.",
   },
   {
     id: "AWS-007", name: "Bulk S3 Object Download", severity: "HIGH" as Severity,
-    description: "More than 20 S3 GetObject calls from the same principal within 5 minutes — possible data exfiltration.",
-    mitigation: "Enable S3 data events in CloudTrail, restrict GetObject with resource-based policies.",
+    description: "More than 20 S3 GetObject calls from the same principal within 5 minutes. This volume of downloads is unusual and may indicate data exfiltration.",
+    mitigation: "Enable S3 data events in CloudTrail and restrict GetObject access using resource-based policies.",
   },
   {
     id: "AWS-008", name: "Mass S3 Deletion", severity: "CRITICAL" as Severity,
-    description: "More than 10 S3 DeleteObject/DeleteObjects calls within 5 minutes — ransomware or destructive insider attack.",
-    mitigation: "Enable S3 Versioning and MFA Delete on critical buckets.",
+    description: "More than 10 DeleteObject or DeleteObjects calls within 5 minutes. This could be ransomware wiping data or a destructive insider attack.",
+    mitigation: "Enable S3 Versioning and require MFA Delete on all critical buckets.",
   },
   {
     id: "AWS-009", name: "New IAM User / Access Key", severity: "MEDIUM" as Severity,
-    description: "CreateUser or CreateAccessKey was called — a possible backdoor for persistent programmatic access.",
-    mitigation: "Alert on all IAM user creation, enforce JIT access patterns, review new users immediately.",
+    description: "CreateUser or CreateAccessKey was called. Attackers often create new users or keys to maintain persistent programmatic access after an initial compromise.",
+    mitigation: "Alert on all IAM user creation, enforce just-in-time access patterns, and review any new users immediately.",
   },
   {
     id: "AWS-010", name: "Off-Hours Console Access", severity: "MEDIUM" as Severity,
-    description: "Any CloudTrail event outside business hours (10 PM – 6 AM). May indicate a compromised account.",
-    mitigation: "Use time-based IAM condition keys (aws:CurrentTime) to restrict sensitive actions off-hours.",
+    description: "A CloudTrail event occurred outside business hours, between 10 PM and 6 AM. While not always malicious, it is worth investigating as it may indicate a compromised account.",
+    mitigation: "Use time-based IAM condition keys like aws:CurrentTime to restrict sensitive actions during off-hours.",
   },
 ];
 
 const awsActions = [
-  { action: "disable_access_keys",    what: "Lists all IAM access keys for the user and marks them Inactive via UpdateAccessKey.", when: "Stolen credentials or key compromise." },
-  { action: "detach_admin_policy",    what: "Detaches AdministratorAccess managed policy from the user via DetachUserPolicy.", when: "IAM privilege escalation (AWS-003)." },
-  { action: "enable_cloudtrail",      what: "Calls StartLogging on the trail ARN to re-enable audit logging.", when: "CloudTrail was disabled (AWS-002)." },
-  { action: "block_s3_public_access", what: "Applies account-level S3 Block Public Access via PutPublicAccessBlock.", when: "Bucket made public (AWS-005)." },
-  { action: "quarantine_user",        what: "Creates a Deny-All inline policy and attaches it to the user, effectively freezing all their permissions.", when: "High-confidence threat with no specific fix." },
-  { action: "notify_admin",           what: "No AWS API call — alert is stored and surfaced in the dashboard only.", when: "Medium/low confidence or uncertain verdict." },
+  { action: "disable_access_keys",    what: "Lists all IAM access keys belonging to the user and marks each one as Inactive using UpdateAccessKey.", when: "Stolen credentials or suspected key compromise." },
+  { action: "detach_admin_policy",    what: "Removes the AdministratorAccess managed policy from the user using DetachUserPolicy.", when: "IAM privilege escalation is detected (AWS-003)." },
+  { action: "enable_cloudtrail",      what: "Calls StartLogging on the trail ARN to immediately re-enable audit logging.", when: "CloudTrail was disabled (AWS-002)." },
+  { action: "block_s3_public_access", what: "Applies an account-level S3 Block Public Access configuration using PutPublicAccessBlock.", when: "A bucket was made public (AWS-005)." },
+  { action: "quarantine_user",        what: "Creates a Deny-All inline IAM policy and attaches it directly to the user, which freezes all their permissions without deleting the account.", when: "High-confidence threat where no specific fix applies." },
+  { action: "notify_admin",           what: "No AWS API call is made. The alert is stored and surfaces in the dashboard for manual review.", when: "Medium or low confidence verdict, or when GPT-4.1 is uncertain." },
 ];
 
 export default function HowItWorksPage() {
   return (
     <div className="flex flex-col gap-8 p-6 max-w-4xl">
 
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">How it Works</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          End-to-end walkthrough — from raw CloudTrail event to automated AWS remediation.
+          A full walkthrough of the system, from a raw CloudTrail event all the way to an automated AWS response.
         </p>
       </div>
 
-      {/* Pipeline overview */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -101,22 +99,22 @@ export default function HowItWorksPage() {
               {
                 icon: Shield, color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20",
                 label: "Layer 1 — Rule Engine",
-                desc: "10 hand-written rules check every event against known attack patterns (root usage, IAM escalation, bulk deletion, off-hours access, etc.). Fast, deterministic, and zero false negatives for known threats.",
+                desc: "Ten hand-written rules check every incoming event against known attack patterns like root account usage, IAM privilege escalation, and bulk S3 deletion. This layer is fast, deterministic, and will never miss a known threat.",
               },
               {
                 icon: Activity, color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20",
-                label: "Layer 2 — Isolation Forest (ML)",
-                desc: "Isolation Forest — a classical ML algorithm — scores every event 0–1 based on how anomalous it looks compared to normal behaviour. No neural network or training data needed; it uses random decision trees to spot outliers. Catches threats no rule covers — unusual timing, rare action bursts, suspicious user types.",
+                label: "Layer 2 — Isolation Forest",
+                desc: "Isolation Forest is a classical ML algorithm that scores every event between 0 and 1 based on how unusual it looks compared to a baseline of normal behaviour. It catches threats that no written rule would cover, such as unusual access timing, sudden bursts of activity, or rare user types. No training data or neural network involved.",
               },
               {
                 icon: Brain, color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20",
                 label: "Layer 3 — GPT-4.1 Final Verdict",
-                desc: "Every suspect (rule match OR anomaly score > 0.62) is reviewed by GPT-4.1. It receives the full event, all matched rules, and the ML score, then returns a structured verdict: isThreat, confidence %, severity, plain-English reasoning, and a recommended AWS action.",
+                desc: "Every suspect (any event that matched a rule or scored above 0.62 on the anomaly scale) gets reviewed by GPT-4.1. It receives the full event, all matched rules, and the ML score together, then returns a structured verdict with isThreat, confidence percentage, severity, plain-English reasoning, and a recommended AWS action.",
               },
               {
                 icon: Zap, color: "text-green-500", bg: "bg-green-500/10 border-green-500/20",
                 label: "Auto-Remediation",
-                desc: "If GPT-4.1 returns isThreat=true with confidence ≥ 75%, the system immediately executes the recommended AWS action — disabling access keys, detaching admin policies, blocking public S3 access, or quarantining the user.",
+                desc: "When GPT-4.1 returns isThreat as true with a confidence of 75% or more, the system immediately calls the AWS API to carry out the recommended action. This could mean disabling access keys, removing admin policies, blocking public S3 access, or quarantining the user entirely.",
               },
             ].map((step, i) => (
               <div key={i} className="flex gap-4">
@@ -136,7 +134,6 @@ export default function HowItWorksPage() {
         </CardContent>
       </Card>
 
-      {/* Data flow */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -147,14 +144,14 @@ export default function HowItWorksPage() {
         <CardContent className="pb-5">
           <div className="flex flex-col gap-2">
             {[
-              { n: "1", text: "Events fetched from AWS CloudTrail (LookupEvents API) or the built-in simulator." },
-              { n: "2", text: "User history pre-fetched from MongoDB to support rate-based rules — e.g. counting AccessDenied errors in the last 5 minutes." },
-              { n: "3", text: "Rule engine evaluates each event against all 10 rules in memory. Matches stored in a map keyed by event_id." },
-              { n: "4", text: "Isolation Forest scores every event. Feature vector: off-hours flag, action risk level, root/assumed-role flags, public permission flag, recent activity rate." },
-              { n: "5", text: "Suspects collected: any event with at least one rule match OR an anomaly score above 0.62." },
-              { n: "6", text: "GPT-4.1 called for each suspect with full context (event JSON + rule matches + ML score). Max 5 concurrent calls to respect rate limits." },
-              { n: "7", text: "If confidence ≥ 75% and isThreat=true, the recommended AWS action executes immediately via the AWS SDK." },
-              { n: "8", text: "All logs and enriched alerts (with AI verdict + action result) bulk-written to MongoDB. Dashboard reflects the results on next load." },
+              { n: "1", text: "Events are fetched from AWS CloudTrail using the LookupEvents API, or generated by the built-in simulator." },
+              { n: "2", text: "The user history for each unique actor is pre-fetched from MongoDB. This is needed for rate-based rules that count events over a time window, such as 10 AccessDenied errors in 5 minutes." },
+              { n: "3", text: "The rule engine evaluates every event against all 10 rules in memory. Any matches are stored in a map keyed by event ID." },
+              { n: "4", text: "Isolation Forest scores every event using a 6-feature vector. Events that score above 0.62 are flagged as anomalies." },
+              { n: "5", text: "Suspects are collected. An event is a suspect if it matched at least one rule, or if its anomaly score exceeded the threshold." },
+              { n: "6", text: "GPT-4.1 is called for each suspect with full context including the event JSON, matched rules, and ML score. Up to 5 calls run in parallel to stay within rate limits." },
+              { n: "7", text: "If GPT-4.1 returns isThreat as true with confidence at or above 75%, the recommended AWS action is executed immediately using the AWS SDK." },
+              { n: "8", text: "All logs and enriched alerts are bulk-written to MongoDB. The dashboard and alerts page reflect the new data on the next load." },
             ].map(({ n, text }) => (
               <div key={n} className="flex gap-3 items-start">
                 <span className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-foreground mt-0.5">
@@ -167,7 +164,6 @@ export default function HowItWorksPage() {
         </CardContent>
       </Card>
 
-      {/* Isolation Forest */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -177,16 +173,16 @@ export default function HowItWorksPage() {
         </CardHeader>
         <CardContent className="pb-5">
           <p className="text-xs text-muted-foreground mb-3">
-            Each event is converted into a 6-number feature vector. The Isolation Forest algorithm fits on 300 synthetic normal events to establish a baseline, then scores real events by how many random tree splits it takes to isolate them — fewer splits = more anomalous = higher score.
+            Each event is turned into a 6-number feature vector before scoring. The algorithm fits on 300 synthetic normal events to build a baseline, then scores real events by counting how many random tree splits it takes to isolate them. Events that get isolated quickly are unusual, and unusual events get higher scores.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
             {[
-              { feat: "isOffHours",    desc: "1 if outside 9 AM–6 PM on a weekday" },
-              { feat: "actionRisk",    desc: "0.0–1.0  —  VIEW=0.0, DELETE=0.7, IAM_ESCALATION=1.0" },
-              { feat: "isRoot",        desc: "1 if user_type is root" },
-              { feat: "isAssumedRole", desc: "1 if user_type is assumed_role" },
-              { feat: "hasPublicPerm", desc: "1 if permission_type contains 'public'" },
-              { feat: "recentRate",    desc: "Events from this user in the last 5 min, normalised 0–1" },
+              { feat: "isOffHours",    desc: "Set to 1 if the event happened outside 9 AM to 6 PM on a weekday" },
+              { feat: "actionRisk",    desc: "A score from 0.0 to 1.0 where VIEW is 0.0, DELETE is 0.7, and IAM_ESCALATION is 1.0" },
+              { feat: "isRoot",        desc: "Set to 1 if the user type is root" },
+              { feat: "isAssumedRole", desc: "Set to 1 if the user type is assumed_role" },
+              { feat: "hasPublicPerm", desc: "Set to 1 if the permission type contains the word public" },
+              { feat: "recentRate",    desc: "How many events this user triggered in the last 5 minutes, normalised to a value between 0 and 1" },
             ].map(({ feat, desc }) => (
               <div key={feat} className="flex gap-2 items-start rounded-md border bg-muted/30 px-3 py-2">
                 <code className="text-[11px] font-mono text-purple-500 shrink-0 mt-0.5">{feat}</code>
@@ -195,13 +191,12 @@ export default function HowItWorksPage() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Score closer to <span className="font-semibold text-foreground">1.0</span> = harder to explain with normal patterns = more anomalous.
-            Threshold is <span className="font-semibold text-foreground">0.62</span> — events above this get sent to GPT-4.1 as suspects even if no rule fired.
+            A score closer to <span className="font-semibold text-foreground">1.0</span> means the event is harder to explain using normal patterns and is therefore more anomalous.
+            The cutoff is <span className="font-semibold text-foreground">0.62</span>. Anything above this gets forwarded to GPT-4.1 for review, even if no rule matched.
           </p>
         </CardContent>
       </Card>
 
-      {/* AWS actions */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -211,7 +206,7 @@ export default function HowItWorksPage() {
         </CardHeader>
         <CardContent className="pb-5">
           <p className="text-xs text-muted-foreground mb-3">
-            GPT-4.1 picks one action from a fixed list. Only executes when <span className="font-semibold text-foreground">confidence ≥ 75%</span> and <span className="font-semibold text-foreground">isThreat = true</span>. Result (SUCCESS / FAILED / SKIPPED) is stored on the alert.
+            GPT-4.1 picks one action from a fixed list of six. The action only runs when confidence is at least 75% and isThreat is true. The result (SUCCESS, FAILED, or SKIPPED) is saved directly on the alert record.
           </p>
           <div className="flex flex-col divide-y">
             {awsActions.map(({ action, what, when }) => (
@@ -225,7 +220,6 @@ export default function HowItWorksPage() {
         </CardContent>
       </Card>
 
-      {/* Detection rules */}
       <div>
         <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
           <Cloud className="h-4 w-4 text-primary" />
@@ -257,13 +251,12 @@ export default function HowItWorksPage() {
         </div>
       </div>
 
-      {/* API */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold">Running the Pipeline</CardTitle>
         </CardHeader>
         <CardContent className="pb-4 text-sm text-muted-foreground flex flex-col gap-2">
-          <p>Hit <code className="text-xs bg-muted px-1 py-0.5 rounded">POST /api/run</code> to trigger a full scan:</p>
+          <p>Send a POST request to <code className="text-xs bg-muted px-1 py-0.5 rounded">/api/run</code> to kick off a full scan:</p>
           <pre className="rounded-md bg-muted px-4 py-3 text-xs font-mono text-foreground overflow-x-auto whitespace-pre-wrap">
 {`# Simulated events (no AWS credentials needed)
 POST /api/run
@@ -274,11 +267,11 @@ POST /api/run
 {
   "source": "aws",
   "region": "ap-south-1",
-  "aws_access_key": "AKIA…",
-  "aws_secret_key": "…"
+  "aws_access_key": "AKIA...",
+  "aws_secret_key": "..."
 }`}
           </pre>
-          <p>Or use the <span className="font-semibold text-foreground">Simulate</span> button in the sidebar to run a simulated scan instantly.</p>
+          <p>You can also hit the <span className="font-semibold text-foreground">Simulate</span> button in the sidebar to run a scan without any setup.</p>
         </CardContent>
       </Card>
 

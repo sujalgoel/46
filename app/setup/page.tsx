@@ -43,7 +43,7 @@ const awsSteps = [
   {
     icon: Terminal,
     title: "Install boto3",
-    description: "The AWS SDK for Python — required by AWSCloudTrailAdapter.",
+    description: "The AWS SDK for Python, required to pull events from CloudTrail.",
     code: "pip install boto3",
   },
   {
@@ -57,7 +57,7 @@ export AWS_DEFAULT_REGION=ap-south-1`,
   {
     icon: Settings,
     title: "Run analysis via the API",
-    description: "POST to /api/run with source=aws. The engine automatically uses AWS_RULES.",
+    description: "Send a POST request to /api/run with source set to aws. The pipeline runs all 10 rules plus ML anomaly detection automatically.",
     code: `curl -X POST http://127.0.0.1:8080/api/run \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -92,10 +92,10 @@ export default function SetupPage() {
           AWS CloudTrail Setup
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Connect the IDS to an AWS account using the CloudTrail{" "}
+          Connect the IDS to a real AWS account using the CloudTrail{" "}
           <code className="text-xs bg-muted px-1 py-0.5 rounded">LookupEvents</code> API.
-          Uses <code className="text-xs bg-muted px-1 py-0.5 rounded">AWS_RULES</code> (10 rules)
-          automatically when <code className="text-xs bg-muted px-1 py-0.5 rounded">source=aws</code>.
+          All 10 detection rules activate automatically when you pass{" "}
+          <code className="text-xs bg-muted px-1 py-0.5 rounded">source=aws</code>.
         </p>
       </div>
 
@@ -106,8 +106,8 @@ export default function SetupPage() {
           <div className="text-sm">
             <p className="font-medium text-blue-400 mb-1">S3 data events for full coverage</p>
             <p className="text-muted-foreground">
-              Management events (IAM, login, CloudTrail changes) are captured by default.
-              To detect bulk downloads (AWS-007) and mass deletions (AWS-008) you must also
+              Management events like IAM changes, logins, and CloudTrail modifications are captured by default.
+              To detect bulk downloads (AWS-007) and mass deletions (AWS-008) you also need to
               enable <strong className="text-foreground">S3 data events</strong> in your trail.
             </p>
           </div>

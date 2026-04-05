@@ -62,7 +62,7 @@ export default async function AlertsPage({
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Alerts</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Rule engine + ML anomaly detection + GPT-4.1 verdict — {alerts.length} shown
+          Three-layer detection: rule engine, Isolation Forest anomaly scoring, and GPT-4.1 verdict. Showing {alerts.length} alerts.
         </p>
       </div>
 
