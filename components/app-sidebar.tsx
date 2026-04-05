@@ -21,7 +21,7 @@ const navItems = [
   { href: "/",           label: "Dashboard", icon: LayoutDashboard },
   { href: "/alerts",     label: "Alerts",    icon: Bell },
   { href: "/logs",       label: "Logs",      icon: FileText },
-  { href: "/aws-rules",  label: "AWS Rules", icon: Cloud },
+  { href: "/how-it-works", label: "How it Works", icon: Cloud },
   { href: "/setup",      label: "Setup",     icon: Settings },
 ];
 
