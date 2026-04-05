@@ -1,6 +1,9 @@
 import { generateText, Output } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import type { LogEvent, TriggeredAlert } from "./rule-engine";
+
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const VerdictSchema = z.object({
   isThreat: z
@@ -49,7 +52,7 @@ export async function getAIVerdict(
   anomalyScore: number,
 ): Promise<AIVerdict> {
   const { experimental_output } = await generateText({
-    model: "openai/gpt-4.1",
+    model: openai("gpt-4.1"),
     output: Output.object({ schema: VerdictSchema }),
     system: `You are an expert AWS cloud security analyst for an automated Intrusion Detection System.
 Your verdicts trigger real AWS remediation actions — be accurate and conservative.
