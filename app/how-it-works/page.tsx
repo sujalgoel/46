@@ -150,8 +150,8 @@ export default function HowItWorksPage() {
               { n: "4", text: "Isolation Forest scores every event using a 6-feature vector. Events that score above 0.62 are flagged as anomalies." },
               { n: "5", text: "Suspects are collected. An event is a suspect if it matched at least one rule, or if its anomaly score exceeded the threshold." },
               { n: "6", text: "GPT-4.1 is called for each suspect with full context including the event JSON, matched rules, and ML score. Up to 5 calls run in parallel to stay within rate limits." },
-              { n: "7", text: "If GPT-4.1 returns isThreat as true with confidence at or above 75%, the recommended AWS action is executed immediately using the AWS SDK." },
-              { n: "8", text: "All logs and enriched alerts are bulk-written to MongoDB. The dashboard and alerts page reflect the new data on the next load." },
+              { n: "7", text: "If GPT-4.1 returns isThreat as true with confidence at or above 75%, the recommended AWS action is executed immediately using the AWS SDK. This could be disabling the user's access keys, detaching an admin policy, re-enabling CloudTrail, blocking public S3 access, or quarantining the user with a Deny-All policy. The outcome (SUCCESS, FAILED, or SKIPPED) is recorded on the alert." },
+              { n: "8", text: "All logs and enriched alerts, including the AI verdict, confidence score, reasoning, and action result, are bulk-written to MongoDB. The dashboard and alerts page reflect the new data on the next load." },
             ].map(({ n, text }) => (
               <div key={n} className="flex gap-3 items-start">
                 <span className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-foreground mt-0.5">
