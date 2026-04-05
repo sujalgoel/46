@@ -200,7 +200,7 @@ export default async function AlertsPage({
                     {a.ai_reasoning && (
                       <TableRow key={`${a.alert_id}-reasoning`} className="bg-muted/30 border-0">
                         <TableCell colSpan={8} className="py-1.5 pl-8 pr-4">
-                          <p className="text-xs text-muted-foreground italic">
+                          <p className="text-xs text-muted-foreground italic whitespace-normal break-words max-w-2xl">
                             <span className="font-medium not-italic text-foreground">AI: </span>
                             {a.ai_reasoning}
                             {a.action_taken && a.action_taken !== "none" && (
