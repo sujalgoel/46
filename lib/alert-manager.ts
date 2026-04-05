@@ -1,6 +1,7 @@
 // frontend/lib/alert-manager.ts
 import { prisma } from "./prisma";
 import type { LogEvent, TriggeredAlert } from "./rule-engine";
+import type { EnrichedAlert } from "./ai-verdict";
 
 export async function storeLog(event: LogEvent): Promise<void> {
   try {
@@ -100,6 +101,34 @@ export async function storeAlerts(alerts: TriggeredAlert[]): Promise<void> {
       details:      a.details,
       event:        a.event,
       acknowledged: false,
+    })),
+    ordered: false,
+  });
+}
+
+// Bulk insert enriched alerts (with AI verdict + action fields)
+export async function storeEnrichedAlerts(alerts: EnrichedAlert[]): Promise<void> {
+  if (alerts.length === 0) return;
+  await (prisma as any).$runCommandRaw({
+    insert:    "alerts",
+    documents: alerts.map(a => ({
+      alert_id:      crypto.randomUUID(),
+      timestamp:     a.timestamp,
+      rule_id:       a.rule_id,
+      rule_name:     a.rule_name,
+      severity:      a.severity,
+      user_email:    a.user_email,
+      details:       a.details,
+      event:         a.event,
+      acknowledged:  false,
+      anomaly_score: a.anomaly_score ?? null,
+      ai_verdict:    a.ai_verdict    ?? null,
+      ai_confidence: a.ai_confidence ?? null,
+      ai_reasoning:  a.ai_reasoning  ?? null,
+      ai_action:     a.ai_action     ?? null,
+      action_taken:  a.action_taken  ?? null,
+      action_status: a.action_status ?? null,
+      is_anomaly:    a.is_anomaly    ?? false,
     })),
     ordered: false,
   });

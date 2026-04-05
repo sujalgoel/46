@@ -22,16 +22,25 @@ model Log {
 }
 
 model Alert {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
-  alert_id     String  @unique
-  timestamp    String
-  rule_id      String
-  rule_name    String
-  severity     String
-  user_email   String
-  details      String
-  event        Json
-  acknowledged Boolean @default(false)
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  alert_id        String   @unique
+  timestamp       String
+  rule_id         String
+  rule_name       String
+  severity        String
+  user_email      String
+  details         String
+  event           Json
+  acknowledged    Boolean  @default(false)
+  // AI layer fields
+  anomaly_score   Float?
+  ai_verdict      String?  // "THREAT" | "SAFE" | "UNCERTAIN"
+  ai_confidence   Float?
+  ai_reasoning    String?
+  ai_action       String?  // recommended action from GPT-4.1
+  action_taken    String?  // actual AWS action executed
+  action_status   String?  // "SUCCESS" | "FAILED" | "SKIPPED"
+  is_anomaly      Boolean  @default(false)
 
   @@map("alerts")
 }

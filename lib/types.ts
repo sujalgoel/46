@@ -19,6 +19,15 @@ export interface Alert {
   details: string;
   event: unknown;
   acknowledged: boolean;
+  // AI layer fields
+  anomaly_score:  number  | null;
+  ai_verdict:     string  | null;  // "THREAT" | "SAFE" | "UNCERTAIN"
+  ai_confidence:  number  | null;
+  ai_reasoning:   string  | null;
+  ai_action:      string  | null;
+  action_taken:   string  | null;
+  action_status:  string  | null;  // "SUCCESS" | "FAILED" | "SKIPPED"
+  is_anomaly:     boolean | null;
 }
 
 export interface LogEntry {
