@@ -41,3 +41,14 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# MCP / Playwright
+.mcp.json
+.playwright-mcp/
+
+# IDE
+.vscode/
+
+# Project assets not needed in repo
+*.png
+"group46.final .pdf"
